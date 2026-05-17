@@ -17,13 +17,27 @@
     <br>
     ##ЛУЗ<br>
     <br>
-    useradd -m -u {UID} -s /bin/bash sshuser<br>
-    echo "sshuser:P@ssw0rd" | chpasswd
+    useradd -m -u {UID} -s /bin/bash sshuser<br>   
+    <br> 
+    <br>useradd - создаёт пользователя
+    <br>с uid {UID}
+    <br>с оболочкой /bin/bash
+    <br>с именем sshuser
     <br>
     <br>
-    echo "sshuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/90-sshuser
+    echo "{имя пользователя}:{его пароль}" | chpasswd
+    <br>
+    <br>
+    echo "sshuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/90-sshuser 
+    <br>
+    <br> даёт полный доступ юзеру
+    <br>
     <br>
     chmod 440 /etc/sudoers.d/90-sshuser
+    <br>
+    <br> Применяет это
+
+
 
     <br>
     <br>
