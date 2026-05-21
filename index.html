@@ -14,7 +14,8 @@
     iptables -t nat -A POSTROUTING -o {to internet} -j MASQUERADE<br>
     exit 0<br>
     <br>
-    chmod +x /etc/rc.local<br>
+    bash -n {путь}  # проверка файла
+    chmod +x {путь}  # применение<br>
     <br>
     <br>
     =============ЛУЗ=============<br>
@@ -36,10 +37,36 @@
     <br>
     <br>
     chmod 440 /etc/sudoers.d/90-sshuser
-    <br> Применяет это
-
-
-
+    <br> Применяет это<br>
+    <br>
+    <br>
+    =============VLAN-ы=============<br>
+    <br>
+    <br>nmcli connection add type bridge ifname hq-br con-name hq-br autoconnect yes bridge.vlan-filtering yes
+    <br> - создание бриджа
+    <br>
+    <br>type bridge — добавляет бридж
+    <br>ifname hq-br — Будет создан виртуальный интерфейс с именем
+    <br>con-name hq-br — имя профиля в NetworkManager
+    <br>
+    <br> nmcli connection add type ethernet ifname ens224 con-name hq-br-slave autoconnect yes master hq-br
+    <br>- созднмание "соединения"
+    <br>
+    <br>nmcli connection add type vlan con-name {vlan№} ifname ens224.{vlan№} dev ens224 id {№} ipv4.addresses {ip адрес, например172.16.100.1/26} ipv4.method manual
+    <br>- создание всех вланов 
+    <br>
+    <br>
+    =============действия с ip route=============<br>
+    <br>
+    <br>ip route del default #удалить "default"
+    <br>
+    <br>ip route add default via 172.16.100.1 #добавить "default" с "via"  172.16.100.1
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
     <br>
     <br>
     <br>
