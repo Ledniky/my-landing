@@ -1,4 +1,4 @@
-<title>github.com</title>
+<title>GitHub.com</title>
 <link rel="icon" type="image/png" href="i-no-bg-preview (carve.photos).png">
 <link rel="stylesheet" href="style.css">
 <p1>
@@ -15,8 +15,26 @@
     iptables -t nat -A POSTROUTING -o {to internet} -j MASQUERADE<br>
     exit 0<br>
     <br>
-    bash -n {путь}  # проверка файла
+    bash -x {путь}  # проверка файла
+    <br>
     chmod +x {путь}  # применение<br>
+    <br>
+    ip route add default via {шлюз}<br>  
+    <br>
+    <br>
+    =============починка "сеть недоступна"=============<br>
+    <br>
+    <br>
+    ip route show
+    <br>ip route del {первое из лишнег осоединения}
+    <br>ip route add {правильное слово} dev {его порт}
+    <br>
+    <br>
+    <br>
+    =============починка "связь между сетями"=============<br>
+    <br>
+    <br>
+    <br>ip route add {в какую подсеть}.0/24 via {в какой она стороне}
     <br>
     <br>
     =============ЛУЗ=============<br>
@@ -65,6 +83,22 @@
     <br>
     <br>
     <br>
+    =============Удалённый SSH доступ=============<br>
+    <br>
+    <br>/etc/ssh/sshd_config
+    <br>
+    <br>Port 2024
+    <br>AllowUsers sshuser
+    <br>MaxAuthTries 2
+    <br>Banner /etc/ssh/ssh-banner
+    <br>
+    <br>echo "Authorized access only" > /etc/ssh/ssh-banner
+    <br>chmod 644 /etc/ssh/ssh-banner
+    <br>
+    <br>systemctl restart sshd
+    <br>systemctl status sshd
+    <br>
+    <br>ssh -p 2024 sshuser@172.16.100.10
     <br>
     <br>
     <br>
@@ -75,6 +109,5 @@
     <br>
     <br>
     <br>
-    <br><br>
 
 </p1>
