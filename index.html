@@ -22,7 +22,7 @@
     ip route add default via {шлюз}<br>  
     <br>
     <br>
-    =============починка "сеть недоступна"=============<br>
+    =============Починка "сеть недоступна"=============<br>
     <br>
     <br>
     ip route show
@@ -81,6 +81,10 @@
     <br>
     <br>ip route add default via 172.16.100.1 #добавить "default" с "via"  172.16.100.1
     <br>
+    <br>ip route add {ip} dev ens192   # трафик для ip навправлять в порт ens192
+    <br>
+    <br>ip route add {ip} via 172.16.6.2  # трафик для ip навправлять в порт где 172.16.6.2
+    <br>
     <br>
     <br>
     =============Удалённый SSH доступ=============<br>
@@ -102,10 +106,119 @@
     <br>
     <br>
     <br>
+    =============GRE=============<br>
+    <br>
+    <br>
+    nmcli connection add type ip-tunnel con-name {Имя соединения} ifname {имя интерфейса, например gre1}<br>
+    ip-tunnel.local {локальный ip - откуда стартует туннель (внешний на роутере)} ip-tunnel.remote {ip удалённого конца тоннеля} <br>
+    ip-tunnel.mode gre ipv4.addresses 10.10.10.1/30 (30 - маска для 2х аддресов) ipv4.method manual<br>
+    # создаёт профиль соединения типа "gre"<br>
+    <br>
+    nmcli connection up {имя профиля} # включение тоннеля<br><br><br>
+
+    Или черз nmtui<br><br>
+
+    <p2>Имя профиля gre-br-hq</p2>
+    <p2>Устройство gre1</p2>
+    <br>
+    Туннель IP<br>
+    Режим GRE<br>
+    Родительский <br>
+    Локальный IP 172.16.5.2<br>
+    Удалённый IP 172.16.4.2<br>
+    <br>
+    КОНФИГУРАЦИЯ IPv4 Вручную<br>
+    Адреса 10.10.10.2/30<br>
+    <br>
+    <br>
+    =============Динамическая маршрутизация FRR=============<br>
+    <br>
+    <br>
+    apt install -y frr
+    <br>
+    <br>
+    в /etc/frr/daemons проверить
+    <br>ospfd=yes
+    <br>zebra=yes
+    <br>
+    <br>systemctl enable --now frr
+    <br>
+    <br>vtysh вход в 
+    <br>
+    <br>c/t
+    <br>
+    <br>route ospf 
+    <br>
+    <br>passive-interface default
+    <br>
+    <br>network {сеть} area 0  # добавляет сеть в area 0, нужно проделать  со всеми вланами и тоннелями
+    <br>
+    <br>
+    interface gre1
+    <br>
+        no ip ospf passive
+        <br>
+        ip ospf authentication message-digest
+        <br>
+        ip ospf message-digest-key 1 md5 P@ssw0rd
+        <br># отменяет пассивный режим на gre1
+    <br>
+    <br>end
+    <br>
+    <br>wr mem
+    <br>
+    <br>show ip route # проверка
     <br>
     <br>
     <br>
+    =============DHCP=============<br>
     <br>
+    <br>
+    <br>/etc/default/isc-dhcp-server
+    <br>
+    <br>INTERFACESv4="ens224.vlan200"
+    <br>
+    <br>/etc/dhcp/dhcpd.conf
+    <br>
+    <br>option domain-name "au-team.irpo";
+    option domain-name-servers 192.168.100.2;
+    default-lease-time 6000;
+    max-lease-time 72000;
+    authoritative;
+    
+    subnet 172.16.200.0 netmask 255.255.255.0 {
+        range 172.16.200.2 172.16.200.254;
+        option routers 172.16.200.1;
+    }
+    <br>
+    <br>dhcpd -t -cf /etc/dhcp/dhcpd.conf  # проверка конфига
+    <br>
+    <br>systemctl enable isc-dhcp-server # автозапуск
+    <br>
+    <br>systemctl status isc-dhcp-server #статус
+    <br>
+    <br>
+    <br>
+    =============DNS=============<br>
+    <br>
+    <br>dnsmasq
+    <br>
+    <br>/etc/dnsmasq.conf
+    <br>
+    <br>no-hosts
+    <br>server=77.88.8.8    # ip сервера
+    <br>cache-size=1000
+    <br>all-servers
+    <br>no-negcache
+    <br>interface=*    #лучше указать порты явно (lo, ens№)
+    <br>host-record={Имя устройства},{ip устройства со стороны сервера} # например hg-rtrau-team.irpo, 172.16.100.10
+    <br>host-record={Имя Vlan-а},{Подсеть влана}
+    <br>
+    <br>dnsmasq --test # для проверки
+    <br>
+    <br>systemctl enable --now dnsmasq
+    <br>systemctl status dnsmasq
+    <br>host hq-rtrau-team.irpo 127.0.0.1
     <br>
     <br>
     <br>
